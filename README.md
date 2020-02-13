@@ -2,6 +2,7 @@
 
 The bill management system will be used to track the bills and vendor specific management system.
 There is no UI forms in the project and is meant to be reference for a backend application
+No UI and REST API only
 
 
 
