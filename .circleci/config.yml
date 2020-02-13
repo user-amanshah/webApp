@@ -110,7 +110,4 @@ workflows:
 
   build_deploy_workflow:
     jobs:
-      - build:
-          filters:
-            branches:
-              only: master
+      - build
