@@ -23,4 +23,4 @@ There are certain requirements to be met
 1. You need to enable 3rd party access on your github account for circle ci to work
 
 2. Import your github project in circle ci account to build test and workflows
-3. yaml file is include , make appropriate changes accorting to your environment. We have used ubuntu docker and postgres image
+3. yaml file is include , make appropriate changes accorting to your environment. We have used ubuntu docker and postgres image.

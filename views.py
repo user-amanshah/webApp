@@ -15,10 +15,10 @@ import bcrypt , uuid
 app = Flask(__name__)
 
 
-#lkjksdnlsjdhjd
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1234@localhost/signin'
-#app.config['SQLALCHEMY_DATABASE_URI'] =  'postgresql://postgres@localhost/circle_test'
+
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1234@localhost/signin'
+app.config['SQLALCHEMY_DATABASE_URI'] =  'postgresql://postgres@localhost/circle_test'
 app.config['UPLOAD_FOLDER']="/home/aman/IdeaProjects/circleCI/attachments/"
 
 root_dir = os.path.dirname(os.path.abspath(__file__))
