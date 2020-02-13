@@ -104,10 +104,10 @@ jobs:
 
 workflows:
   version: 2
-  buildtest:
+  pr_check_workflow:
     jobs:
       - pr_check
-  buildtest:
+  build_deploy_workflow:
     jobs:
       - build:
           filters:
