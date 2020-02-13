@@ -7,7 +7,7 @@ from werkzeug.utils import secure_filename
 import os
 import  psycopg2
 
-#from flask.ext.bcrypt import generate_password_hash
+
 
 import bcrypt , uuid
 
