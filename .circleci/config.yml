@@ -107,9 +107,10 @@ workflows:
   pr_check_workflow:
     jobs:
       - pr_check
+
   build_deploy_workflow:
     jobs:
-      - build:
+      - build
           filters:
             branches:
               only: master
