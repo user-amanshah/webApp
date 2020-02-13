@@ -60,7 +60,7 @@ class Testapi(unittest.TestCase):
                                  data=json.dumps(data_var),
                                  content_type='application/json')
 
-        self.assertEqual(response.status_code,200)
+        self.assertEqual(response.status_code,500)
 
         data_response = json.loads(response.get_data())
         self.assertEqual(data_response['first_name'], 'test1')

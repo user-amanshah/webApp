@@ -10,7 +10,7 @@ from uuid import uuid4
 import bcrypt
 from sqlalchemy.dialects.postgresql import UUID
 
-# from views import bcrypt_flask
+# from views import bcrypt_flask_ not used
 
 db = SQLAlchemy()
 
