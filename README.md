@@ -1,7 +1,8 @@
 # Cloud computing bill management system restapi 
 
 The bill management system will be used to track the bills and vendor specific management system.
-There is no UI forms in the project and is meamt to be refernce for a backend application
+There is no UI forms in the project and is meant to be reference for a backend application
+
 
 
 **We will be using python based flask module for developing web rest api. Prior knowledge to flask development is needed**
