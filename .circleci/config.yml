@@ -23,26 +23,24 @@ jobs:
             python3 -m venv venv
             . venv/bin/activate
             pip install -r requirements.txt
+      #
+      # - run:
+      #     name: run views
+      #     command: |
+      #       . venv/bin/activate
+      #       python3 views.py
+      #     background: true
 
-      - run:
-          name: run views
-          command: |
-            . venv/bin/activate
-            python3 views.py
-          background: true
-
-
-      - run:
-          name: run tests
-          command: |
-            . venv/bin/activate
-            python3 -m unittest test_app.py
+      #
+      # - run:
+      #     name: run tests
+      #     command: |
+      #       . venv/bin/activate
+      #       python3 -m unittest test_app.py
 
 
 
-      - store_artifacts:
-          path: test-reports
-          destination: test-reports
+
 
   #
   # build:
@@ -59,45 +57,45 @@ jobs:
   #         name: helloworld
   #         command: |
   #           echo "hello world"
-  build:
-      docker:
-        # specify the version you desire here
-        # use `-browsers` prefix for selenium tests, e.g. `3.6.1-browsers`
-        - image: circleci/python:3.6.1
-        - image: circleci/postgres:9.4
-
-      working_directory: ~/repo
-
-
-      steps:
-        - checkout
-
-        - run:
-            name: install dependencies
-            command: |
-              python3 -m venv venv
-              . venv/bin/activate
-              pip install -r requirements.txt
-
-        - run:
-            name: run views
-            command: |
-              . venv/bin/activate
-              python3 views.py
-            background: true
-
-
-        - run:
-            name: run tests
-            command: |
-              . venv/bin/activate
-              python3 -m unittest test_app.py
-
-
-
-        - store_artifacts:
-            path: test-reports
-            destination: test-reports
+  # build:
+  #     docker:
+  #       # specify the version you desire here
+  #       # use `-browsers` prefix for selenium tests, e.g. `3.6.1-browsers`
+  #       - image: circleci/python:3.6.1
+  #       - image: circleci/postgres:9.4
+  #
+  #     working_directory: ~/repo
+  #
+  #
+  #     steps:
+  #       - checkout
+  #
+  #       - run:
+  #           name: install dependencies
+  #           command: |
+  #             python3 -m venv venv
+  #             . venv/bin/activate
+  #             pip install -r requirements.txt
+  #
+  #       - run:
+  #           name: run views
+  #           command: |
+  #             . venv/bin/activate
+  #             python3 views.py
+  #           background: true
+  #
+  #
+  #       - run:
+  #           name: run tests
+  #           command: |
+  #             . venv/bin/activate
+  #             python3 -m unittest test_app.py
+  #
+  #
+  #
+  #       - store_artifacts:
+  #           path: test-reports
+  #           destination: test-reports
 
 
 
@@ -106,11 +104,11 @@ workflows:
   version: 2
   pr_check_workflow:
     jobs:
-      - pr_check
-
-  build_deploy_workflow:
-    jobs:
-      - build:
-          filters:
-            branches:
-              only: master
+    - pr_check
+  #
+  # build_deploy_workflow:
+  #   jobs:
+  #     - build:
+  #         filters:
+  #           branches:
+  #             only: master
