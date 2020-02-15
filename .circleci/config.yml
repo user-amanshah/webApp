@@ -104,7 +104,7 @@ workflows:
   version: 2
   pr_check_workflow:
     jobs:
-    - pr_check
+      - pr_check
   #
   # build_deploy_workflow:
   #   jobs:
