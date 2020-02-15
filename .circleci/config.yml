@@ -102,7 +102,7 @@ jobs:
 
 workflows:
   version: 2
-  pr_check_workflow:
+  pr_check_workflow1:
     jobs:
       - pr_check
   #
