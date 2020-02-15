@@ -27,4 +27,5 @@ There are certain requirements to be met
 2. Import your github project in circle ci account to build test and workflows
 3. yaml file is include , make appropriate changes accorting to your environment. We have used ubuntu docker and postgres image.
 4. run command "python3 run views.py"
+5. run command "python3 -m test test_app.py"
 
