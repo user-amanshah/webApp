@@ -17,6 +17,8 @@ There are certain requirements to be met
 
 2. Install from requirments.txt  to add the dependency to the project
 
+3. run "pip3 install requirements.txt"
+
 3. prior knowledge of sqlmarshmallow working is required since we will be using ORMS dor database communication
 
 ### Continuous integreation using Circle CI

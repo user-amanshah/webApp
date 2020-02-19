@@ -273,6 +273,11 @@ class File(db.Model):
         File.query.filter_by(id=file_id).delete()
         db.session.commit()
 
+    @staticmethod
+    def delete_file_by_bill(billid):
+        File.query.filter_by(bill_id=billid).delete()
+        db.session.commit()
+
 class Fileschema(Schema):
     #id = fields.UUID()
     id = fields.Str()
