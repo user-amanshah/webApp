@@ -273,14 +273,6 @@ def billcreate():
 
 
 
-
-
-
-
-
-
-
-
 @app.route('/v1/bills', methods=['GET'])
 def getallbills():
     username = request.authorization.username
@@ -349,6 +341,29 @@ def deletebill(billid):
         #return "before delete"
         if owner_id== owner_id_test:
             Bills.delete_bills(billid)
+
+            File.delete_file_by_bill(billid)
+
+            result2=File.select_file_by_billid(billid)
+            file_sc=Fileschema(many=False)
+            data2=file_sc.dump(result2)
+            file_id=data2.get('id')
+
+
+
+
+
+            basedir=app.config['UPLOAD_FOLDER']
+            filedir=basedir+file_id+"/"
+            shutil.rmtree(filedir)
+
+
+
+
+
+
+
+
             return custom_http_code("deleted",204)
         else:
             return custom_http_code("bill id invalid or not found",404)
@@ -766,14 +781,15 @@ def deletefile(billid,fileid):
 
 @app.route('/all',methods=["GET"])
 def all():
-    result=db.session.execute("select bills.id,bills.vendor,bills.amount_due,file.url from bills INNER JOIN file on file.bill_id=bills.id")
+    result=db.session.execute("select bills.id,bills.vendor,bills.amount_due,file.url from bills LEFT JOIN file on file.bill_id=bills.id")
 
     for row in result:
         response = dict(row.items())
+        return jsonify(response)
 
         # Output the query result as JSON
-    print(json.dumps(response))
-    return json.dumps(response)
+    # print(json.dumps(response))
+    # return json.dumps(response)
 
 
 
