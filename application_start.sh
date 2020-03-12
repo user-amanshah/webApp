@@ -4,5 +4,9 @@
 #!/bin/bash
 
 
+
 cd /home/ubuntu/webapp/
-python3 views.py &
+
+sudo kill -9 `lsof -i:8080 -t`
+
+nohup python3 views.py >  /dev/null

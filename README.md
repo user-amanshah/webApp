@@ -31,3 +31,8 @@ There are certain requirements to be met
 4. run command "python3 run views.py"
 5. run command "python3 -m test test_app.py"
 6. #comment
+
+## code deploy part
+
+triggering code deploy from change in config.yml
+creatin new pull request must trigger code deploy
