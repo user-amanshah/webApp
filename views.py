@@ -58,6 +58,11 @@ def checkauthentication(useremail,password):
     return flag
 
 
+@app.route('/', methods=['GET'])
+def hello():
+    return  "hello world"
+
+
 @app.route('/v1/user', methods=['POST'])
 def page():
     db.create_all()
