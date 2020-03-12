@@ -1,6 +1,6 @@
 #!/bin/bash
 
-mkdir /home/ubuntu/webapp
+mkdir -p /home/ubuntu/webapp
 cd /home/ubuntu/webapp
 
 
