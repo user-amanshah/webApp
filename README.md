@@ -17,6 +17,8 @@ There are certain requirements to be met
 
 2. Install from requirments.txt  to add the dependency to the project
 
+3. run "pip3 install requirements.txt"
+
 3. prior knowledge of sqlmarshmallow working is required since we will be using ORMS dor database communication
 
 ### Continuous integreation using Circle CI
@@ -26,3 +28,6 @@ There are certain requirements to be met
 
 2. Import your github project in circle ci account to build test and workflows
 3. yaml file is include , make appropriate changes accorting to your environment. We have used ubuntu docker and postgres image.
+4. run command "python3 run views.py"
+5. run command "python3 -m test test_app.py"
+6. #comment

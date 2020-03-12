@@ -39,8 +39,10 @@ class Credential(db.Model):
         last_name = data.get('last_name')
         email_address = data.get('email_address')
 
-        password = str(data.get('password'))
+        password = data.get('password')
+        password= str(password)
         pwd = bcrypt.hashpw(password.encode('utf8'), bcrypt.gensalt())
+        print(pwd)
         pwd = str(pwd, 'utf-8')
         password = pwd
 
@@ -79,10 +81,11 @@ class Credential(db.Model):
     def updating(self, data_jason):
         self.first_name = data_jason.get('first_name')
         self.last_name = data_jason.get('last_name')
-        password = str(data_jason.get('password'))
+        password =data_jason.get('password')
+        password = password.encode('utf8')
         pwd = bcrypt.hashpw(password.encode('utf8'), bcrypt.gensalt())
-        pwd = str(pwd, 'utf-8')
-        self.password = pwd
+        # pwd = str(pwd, 'utf-8')
+        self.password = str(pwd)
         self.account_updated = datetime.datetime.isoformat()
         db.session.commit()
 
@@ -271,6 +274,11 @@ class File(db.Model):
     @staticmethod
     def delete_file(file_id):
         File.query.filter_by(id=file_id).delete()
+        db.session.commit()
+
+    @staticmethod
+    def delete_file_by_bill(billid):
+        File.query.filter_by(bill_id=billid).delete()
         db.session.commit()
 
 class Fileschema(Schema):
