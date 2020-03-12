@@ -28,7 +28,7 @@ db_name=os.environ['RDS_DBNAME']
 print(db_name)
 app.config['SQLALCHEMY_DATABASE_URI'] = driver+db_user+':'+db_pass+'@'+db_host+'/'+db_name
 print(app.config['SQLALCHEMY_DATABASE_URI'])
-#app.config['SQLA LCHEMY_DATABASE_URI'] = 'postgresql://postgres:1234@localhost/signin'
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1234@localhost/signin'
 #app.config['SQLALCHEMY_DATABASE_URI'] =  'postgresql://postgres@localhost/circle_test'
 app.config['UPLOAD_FOLDER']="/home/aman/IdeaProjects/circleCI/attachments/"
 
@@ -233,6 +233,7 @@ def billcreate():
         #
 
         data1 = request.get_json()
+
         list_var=data1["categories"]
         list_var=str(list_var)
         list_var=((list_var.strip("[")).strip("]")).strip("'")

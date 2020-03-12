@@ -1,114 +1,158 @@
-# Python CircleCI 2.0 configuration file
+## Python CircleCI 2.0 configuration file
+##
+## Check https://circleci.com/docs/2.0/language-python/ for more details
+## hjgdshgdhjhg
+#version: 2
+#jobs:
+#  pr_check:
+#    docker:
+#      # specify the version you desire here
+#      # use `-browsers` prefix for selenium tests, e.g. `3.6.1-browsers`
+#      - image: circleci/python:3.6.1
+#      - image: circleci/postgres:9.4
 #
-# Check https://circleci.com/docs/2.0/language-python/ for more details
-# hjgdshgdhjhg
-version: 2
+#    working_directory: ~/repo
+#
+#
+#    steps:
+#      - checkout
+#
+#      - run:
+#          name: install dependencies
+#          command: |
+#            python3 -m venv venv
+#            . venv/bin/activate
+#            pip install -r requirements.txt
+#
+#      - run:
+#          name: run views
+#          command: |
+#            . venv/bin/activate
+#            python3 views.py
+#          background: true
+#
+#
+#      - run:
+#          name: run tests
+#          command: |
+#            . venv/bin/activate
+#            python3 -m unittest test_app.py
+#
+#
+#
+#
+#
+#  #
+#  # build:
+#  #   docker:
+#  #     # specify the version you desire here
+#  #     # use `-browsers` prefix for selenium tests, e.g. `3.6.1-browsers`
+#  #     - image: circleci/python:3.6.1
+#  #
+#  #
+#  #   steps:
+#  #     - checkout
+#  #
+#  #     - run:
+#  #         name: helloworld
+#  #         command: |
+#  #           echo "hello world"
+#  build:
+#      docker:
+#        # specify the version you desire here
+#        # use `-browsers` prefix for selenium tests, e.g. `3.6.1-browsers`
+#        - image: circleci/python:3.6.1
+#        - image: circleci/postgres:9.4
+#
+#      working_directory: ~/repo
+#
+#
+#      steps:
+#        - checkout
+#
+#        - run:
+#            name: install dependencies
+#            command: |
+#              python3 -m venv venv
+#              . venv/bin/activate
+#              pip install -r requirements.txt
+#
+#        - run:
+#            name: run views
+#            command: |
+#              . venv/bin/activate
+#              python3 views.py
+#            background: true
+#
+#
+#        - run:
+#            name: run tests
+#            command: |
+#              . venv/bin/activate
+#              python3 -m unittest test_app.py
+#  #
+#  #
+#  #
+#  #       - store_artifacts:
+#  #           path: test-reports
+#  #           destination: test-reports
+#
+#
+#
+#
+#workflows:
+#  version: 2
+#  pr_check_workflow:
+#    jobs:
+#      - pr_check
+#  #
+#  build_deploy_workflow:
+#    jobs:
+#      - build:
+#          filters:
+#            branches:
+#              only: master
+#
+#
+#
+#
+#
+#
+
+
+
+
+version: 2.1
 jobs:
-  pr_check:
+  build:
     docker:
-      # specify the version you desire here
-      # use `-browsers` prefix for selenium tests, e.g. `3.6.1-browsers`
-      - image: circleci/python:3.6.1
-      - image: circleci/postgres:9.4
-
-    working_directory: ~/repo
-
+      - image: circleci/python:3.6.4
+    working_directory: ~/webapp
 
     steps:
       - checkout
 
       - run:
-          name: install dependencies
+          name: Install packages
           command: |
-            python3 -m venv venv
-            . venv/bin/activate
-            pip install -r requirements.txt
+            sudo apt-get update && sudo apt-get install wget zip unzip
+            sudo apt-get install python-dev
+            sudo apt-get install python-pip -y
 
       - run:
-          name: run views
-          command: |
-            . venv/bin/activate
-            python3 views.py
-          background: true
-
-
+          name: Install awscli for deployment
+          command: sudo pip install awscli
       - run:
-          name: run tests
+          name: creating & Uploading zip to S3 Bucket
           command: |
-            . venv/bin/activate
-            python3 -m unittest test_app.py
+            AWS_DEFAULT_REGION="us-east-1" aws deploy push \
+            --application-name csye6225-webapp \
+            --description "testing deployement" \
+            --ignore-hidden-files \
+            --s3-location s3://${BUCKET_NAME}/csye-WEBAPPLICATION-${CIRCLE_BUILD_NUM}.zip \
+            --source .
+      - run:
+          name: call code Deploy
+          command: AWS_DEFAULT_REGION="us-east-1"  aws deploy create-deployment --application-name csye6225-webapp --deployment-group-name csye6225-webapp-deployment --s3-location bucket=${BUCKET_NAME},bundleType=zip,key=csye-WEBAPPLICATION-${CIRCLE_BUILD_NUM}.zip --file-exists-behavior OVERWRITE
 
 
-
-
-
-  #
-  # build:
-  #   docker:
-  #     # specify the version you desire here
-  #     # use `-browsers` prefix for selenium tests, e.g. `3.6.1-browsers`
-  #     - image: circleci/python:3.6.1
-  #
-  #
-  #   steps:
-  #     - checkout
-  #
-  #     - run:
-  #         name: helloworld
-  #         command: |
-  #           echo "hello world"
-  build:
-      docker:
-        # specify the version you desire here
-        # use `-browsers` prefix for selenium tests, e.g. `3.6.1-browsers`
-        - image: circleci/python:3.6.1
-        - image: circleci/postgres:9.4
-
-      working_directory: ~/repo
-
-
-      steps:
-        - checkout
-
-        - run:
-            name: install dependencies
-            command: |
-              python3 -m venv venv
-              . venv/bin/activate
-              pip install -r requirements.txt
-
-        - run:
-            name: run views
-            command: |
-              . venv/bin/activate
-              python3 views.py
-            background: true
-
-
-        - run:
-            name: run tests
-            command: |
-              . venv/bin/activate
-              python3 -m unittest test_app.py
-  #
-  #
-  #
-  #       - store_artifacts:
-  #           path: test-reports
-  #           destination: test-reports
-
-
-
-
-workflows:
-  version: 2
-  pr_check_workflow:
-    jobs:
-      - pr_check
-  #
-  build_deploy_workflow:
-    jobs:
-      - build:
-          filters:
-            branches:
-              only: master
