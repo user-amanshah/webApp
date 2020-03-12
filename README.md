@@ -32,7 +32,7 @@ There are certain requirements to be met
 5. run command "python3 -m test test_app.py"
 6. #comment
 
-## code deploy
+## code deploy part
 
 triggering code deploy from change in config.yml
 creatin new pull request must trigger code deploy
