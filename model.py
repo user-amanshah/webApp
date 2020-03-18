@@ -46,8 +46,8 @@ class Credential(db.Model):
         pwd = str(pwd, 'utf-8')
         password = pwd
 
-        account_created = datetime.datetime.now().isoformat()
-        account_updated = datetime.datetime.now().isoformat()
+        account_created = str(datetime.datetime.now().isoformat())
+        account_updated = str(datetime.datetime.now().isoformat())
 
         self.id = id
         self.first_name = first_name
