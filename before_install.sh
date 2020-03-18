@@ -14,6 +14,3 @@ sudo npm i -g forever --save
 cd
 pwd
 
-cd /home/ubuntu/webapp/
-sudo chmod 776 AmazonCloudWatch-config.json
-sudo mv AmazonCloudWatch-config.json /opt
