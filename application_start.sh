@@ -7,14 +7,17 @@
 
 cd /home/ubuntu/webapp/
 
+
+orever stop -a -e error.log -a  -l loger.log -c python3 views.py
+
 sudo kill -9 `lsof -i:8080 -t`
 
-forever stop -a -e error.log -a  -l loger.log -c python3 ../webapp/views.py
+f
 
 
 #nohup python3 views.py >  /dev/null
 
-forever start -a -e error.log -a  -l loger.log -c python3 ../webapp/views.py
+forever start -a -e error.log -a  -l loger.log -c python3 views.py
 
 sudo chmod 776 Am
 #start cloudwatch
