@@ -17,19 +17,19 @@ c = statsd.StatsClient('localhost',8125)
 app = Flask(__name__)
 
 driver = 'postgresql+psycopg2://'
-# #comment
-# bucket=os.environ['S3BUCKET_NAME']
-# db_user= os.environ['RDS_USERNAME']
-# print(db_user)
-# db_host= os.environ['RDSHOST_NAME']
-# print(db_host)
-# db_pass=os.environ['RDS_PASSWORD']
-# print(db_pass)
-# db_name=os.environ['RDS_DBNAME']
-# print(db_name)
-# app.config['SQLALCHEMY_DATABASE_URI'] = driver+db_user+':'+db_pass+'@'+db_host+'/'+db_name
+#comment
+bucket=os.environ['S3BUCKET_NAME']
+db_user= os.environ['RDS_USERNAME']
+print(db_user)
+db_host= os.environ['RDSHOST_NAME']
+print(db_host)
+db_pass=os.environ['RDS_PASSWORD']
+print(db_pass)
+db_name=os.environ['RDS_DBNAME']
+print(db_name)
+app.config['SQLALCHEMY_DATABASE_URI'] = driver+db_user+':'+db_pass+'@'+db_host+'/'+db_name
 # print(app.config['SQLALCHEMY_DATABASE_URI'])
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1234@localhost/signin'
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1234@localhost/signin'
 # app.config['SQLALCHEMY_DATABASE_URI'] =  'postgresql://postgres@localhost/circle_test'
 # app.config['UPLOAD_FOLDER']="/home/aman/IdeaProjects/circleCI/attachments/"
 
@@ -435,7 +435,7 @@ def deletebill(billid):
             dbtime=time.time()
             Bills.delete_bills(billid)
 
-            File.delete_file_by_bill(billid)
+            
 
             result2=File.select_file_by_billid(billid)
 
@@ -446,12 +446,30 @@ def deletebill(billid):
             file_id=data2.get('id')
 
 
+            print(result2)
+        
+            print(data2)
+            if not result2:
+
+                c.incr("getfilecount")
+                dur=(time.time()-start)*1000
+                c.timing("getfilecount",dur)
+
+
+                return custom_http_code("file does not exist bad request",404)
 
 
 
-            basedir=app.config['UPLOAD_FOLDER']
-            filedir=basedir+file_id+"/"
-            shutil.rmtree(filedir)
+
+            #basedir=app.config['UPLOAD_FOLDER']
+            
+            filedir=root_dir+'/'+"attachments/"+file_id+"/"
+            
+            if os.path.isdir(filedir):
+                shutil.rmtree(filedir)
+            else:
+                print("no attachment with bill")
+            File.delete_file_by_bill(billid)
 
 
 
@@ -938,20 +956,33 @@ def deletefile(billid,fileid):
 
 
 
-            basedir=app.config['UPLOAD_FOLDER']
 
             filedir=root_dir+"/"+"attachments"+"/"+fileid+"/"
-            shutil.rmtree(filedir)
+
+            bucketkey='fileid'+'/'
+            client = boto3.client('s3')
+            response = client.delete_object(Bucket=bucket,Key=bucketkey)
+
+            if os.path.exists(filedir):
+                shutil.rmtree(filedir)
+            else:
+                print("file id folder noyt found")
+
+
             File.delete_file(fileid)
-            c.incr("getfilecount")
-            dur=(time.time()-start)*1000
-            c.timing("getfilecount",dur)
-            return custom_http_code(data,204)
+
+
             c.incr("deletefilecount")
             dur=(time.time()-start)*1000
             c.timing("deletefilecount",dur)
+            return custom_http_code(data,204)
+
         else:
+            c.incr("deletefilecount")
+            dur=(time.time()-start)*1000
+            c.timing("deletefilecount",dur)
             return custom_http_code('Unauthorised',401)
+
 
     else:
         return custom_http_code('invalid login',401)
@@ -983,3 +1014,4 @@ if __name__ == '__main__':
     # app = create_app(env_name)
     # run app
     app.run(host='0.0.0.0',port=8080,debug=True)
+#comme
