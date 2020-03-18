@@ -9,3 +9,11 @@ sudo apt-get update
 sudo apt-get install -y nodejs
 sudo curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
 sudo npm i -g forever --save
+
+
+cd
+pwd
+
+cd /home/ubuntu/webapp
+sudo chmod 776 AmazonCloudWatch-config.json
+sudo mv AmazonCloudWatch-config.json /opt

@@ -1,16 +1,18 @@
 {
   "agent": {
     "metrics_collection_interval": 10,
-    "run_as_user": "ubuntu"
+    "run_as_user": "ubuntu",
+    "logfile": "/var/logs/amazon-cloudwatch-agent.log"
   },
   "logs": {
     "logs_collected": {
       "files": {
         "collect_list": [
           {
-            "file_path": "home/ubuntu/.forever/logs.log",
+            "file_path": "home/ubuntu/.forever/loger.log",
             "log_group_name": "csye6225",
-            "log_stream_name": "webapp"
+            "log_stream_name": "webapp",
+            "timestamp_format": "%H:%M:%S %y %b %-d"
           }
         ]
       }
