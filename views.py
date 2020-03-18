@@ -449,7 +449,7 @@ def deletebill(billid):
             print(result2)
         
             print(data2)
-            if not data2:
+            if not result2:
 
                 c.incr("getfilecount")
                 dur=(time.time()-start)*1000
@@ -467,7 +467,8 @@ def deletebill(billid):
             
             if os.path.isdir(filedir):
                 shutil.rmtree(filedir)
-            
+            else:
+                print("no attachment with bill")
             File.delete_file_by_bill(billid)
 
 
