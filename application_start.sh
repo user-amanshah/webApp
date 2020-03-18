@@ -25,7 +25,7 @@ forever start -a -e error.log -a  -l loger.log -c python3 views.py
 cd ../.forever
 
 sudo chmod 776 loger.log
-sudo chmod 776 error.log
+
 
 sudo mv loger.log /opt/
 
