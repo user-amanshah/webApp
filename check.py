@@ -5,13 +5,14 @@ from flask import Flask, jsonify, request, Response
 import re, json , datetime
 import hashlib, shutil
 from werkzeug.utils import secure_filename
-import os , boto3,time
+import os , boto3
+# import statsd
+from statsd import StatsdClient
 import  psycopg2
-import statsd
+
+
+
 import bcrypt , uuid
-
-
-c = statsd.StatsClient('localhost',8125)
 
 
 app = Flask(__name__)
@@ -61,28 +62,14 @@ def checkauthentication(useremail,password):
 
 @app.route('/', methods=['GET'])
 def hello():
-    start=time.time()
-    page="hello world"
-    page2="this is homepage"
-    page=page+page2
-    c.incr("homecount")
-    dur=(time.time()-start)*1000
-    c.timing("hometime",dur)
-    return  page
+    return  "hello world"
 
 
 @app.route('/v1/user', methods=['POST'])
 def page():
-    start=time.time()
     db.create_all()
     user_sc = Credentialschema(many=False)
-    dur=(time.time()-start)*1000
-    c.timing("dbconnect",dur)
-
     data = request.get_json()
-
-
-
 
     check_email = data.get('email_address')
     check_pass = data.get('password')
@@ -113,11 +100,8 @@ def page():
         return True
 
     flagging1 = checkpass(check_pass)
-    dbtime=time.time()
-    if Credential.select_user_by_email(check_email):
-        dur=(time.time()-dbtime)*1000
-        c.timing("dbconnect",dur)
 
+    if Credential.select_user_by_email(check_email):
         return custom_http_code('Bad resquest',400)
 
     if flagging==False or flagging1==False:
@@ -126,13 +110,8 @@ def page():
         load_data = user_sc.load(data)
         new_user = Credential(load_data)
         # Credential.execute_query()
-        dbtime=time.time()
         db.session.add(new_user)
         db.session.commit()
-
-        dur=(time.time()-dbtime)*1000
-        c.timing("dbconnect",dur)
-
 
         #   result=Credential.query.filter_by(first_name='Jane').first()
         result= Credential.select_user_by_email(check_email)
@@ -141,25 +120,17 @@ def page():
         print(data)
         # output=Credential.select_user_by_email(check_email)
         print("done")
-        c.incr("createuser")
-        dur=(time.time()-start)*1000
-        c.timing("createusertime",dur)
         return jsonify(data)
 
 
 
 @app.route('/v1/user/self', methods=['GET'])
 def getinfo():
-    start=time.time()
     username = request.authorization.username
     passwordinfo = request.authorization.password
-
-
     user_sc = Credentialschema(many=False)
-    dbtime=time.time()
+
     flag=checkauthentication(username,passwordinfo)
-    dur=(time.time()-dbtime)*1000
-    c.timing("dbconnect",dur)
     #if flag==True:
 
 
@@ -169,35 +140,23 @@ def getinfo():
 
 
     if flag==True:
-        dbtime=time.time()
         data = user_sc.dump(Credential.select_user_by_email(username))
-        dur=(time.time()-dbtime)*1000
-        c.timing("dbconnect",dur)
         # output=Credential.select_user_by_email(check_email)
         print("done")
-        dur=(time.time()-start)*1000
-        c.timing("getusertime",dur)
-
-        c.incr("getusercount")
         return jsonify(data)
 
     else:
-        c.incr("getusercount")
         return custom_http_code('Unauthorized',401)
 
 
 @app.route('/v1/user/self', methods=['PUT'])
 def updateinfo():
-    start=time.time()
     username = request.authorization.username
     passwordinfo = request.authorization.password
     user_sc = Credentialschema(many=False)
     #auth=Credential.select_user_by_emailandpass(username,passwordinfo)
-    dbtime=time.time()
-    flag=checkauthentication(username,passwordinfo)
-    dur=(time.time()-dbtime)*1000
-    c.timing("dbconnect",dur)
 
+    flag=checkauthentication(username,passwordinfo)
 
 
     if flag==True:
@@ -250,26 +209,14 @@ def updateinfo():
             # Credential.updating(data)
             # db.session.commit()
 
-            dbtime=time.time()
-            state = Credential.query.filter_by(email_address=username).update(dict(password=pwd,first_name=firstname,last_name=lastname))
 
+            state = Credential.query.filter_by(email_address=username).update(dict(password=pwd,first_name=firstname,last_name=lastname))
 
             #    db.session.update(first_name=firstname)
             db.session.commit()
-            dur=(time.time()-dbtime)*1000
-            c.timing("dbconnect",dur)
-
-
-            dur=(time.time()-start)*1000
-            c.timing("putusertime",dur)
-            c.incr("putuserapi")
             return custom_http_code('done update',204)
 
         else:
-
-            c.incr("putuserapi")
-            dur=(time.time()-start)*1000
-            c.timing("putusertime",dur)
             return custom_http_code('bad request',400)
 
     else:
@@ -280,15 +227,12 @@ def updateinfo():
 @app.route('/v1/bill', methods=['POST'])
 def billcreate():
     #db.create_all()
-    start=time.time()
     username = request.authorization.username
     passwordinfo = request.authorization.password
     bill_sc = Billschema(many=False)
     data = request.get_json()
-    dbtime=time.time()
+
     flag=checkauthentication(username,passwordinfo)
-    dur=(time.time()-dbtime)*1000
-    c.timing("dbconnect",dur)
 
 
     if flag==True:
@@ -314,12 +258,8 @@ def billcreate():
 
         load_data = bill_sc.load(data1)
         new_bill = Bills(load_data,id,owner_id)
-
-        dbtime=time.time()
         db.session.add(new_bill)
         db.session.commit()
-        dur=(time.time()-dbtime)*1000
-        c.timing("dbconnect",dur)
 
         result=Bills.select_user_by_billid(id)
         print(owner_id)
@@ -338,31 +278,26 @@ def billcreate():
 
         final=json.loads(data)
         final["attachments"]=attachmentfile
-
-
-        c.incr("postbillcount")
-        dur=(time.time()-start)*1000
-        c.timing("postbilltime",dur)
         return custom_http_code(final,200)
 
     else:
-        c.incr("postbillcount")
-        dur=(time.time()-start)*1000
-        c.timing("postbilltime",dur)
+
         return custom_http_code("not authorized",401)
+
+
+
+
+
 
 
 @app.route('/v1/bills', methods=['GET'])
 def getallbills():
-    start=time.time()
     username = request.authorization.username
     passwordinfo = request.authorization.password
     bill_sc = Billschema(many=False)
     data = request.get_json()
-    dbtime=time.time()
+
     flag=checkauthentication(username,passwordinfo)
-    dur=(time.time()-dbtime)*1000
-    c.timing("dbconnect",dur)
 
     if flag==True:
         result=Credential.select_user_by_email(username)
@@ -373,19 +308,15 @@ def getallbills():
 
 
         bills_schema = Billschema(many=True)
-        dbtime=time.time()
+
         result=Bills.select_user_by_ownerid(owner_id)
-        dur=(time.time()-dbtime)*1000
-        c.timing("dbconnect",dur)
 
         data= bills_schema.dumps(result)
 
         #File.select_file_by_billid()
 
 
-        c.incr("getallbillcount")
-        dur=(time.time()-start)*1000
-        c.timing("getallbilltime",dur)
+
 
 
         return jsonify(data)
@@ -400,16 +331,13 @@ def getallbills():
 
 @app.route('/v1/bill/<billid>', methods=['DELETE'])
 def deletebill(billid):
-    start=time.time()
-    # print(billid)
+    print(billid)
     username = request.authorization.username
     passwordinfo = request.authorization.password
     # bill_sc = Billschema(many=False)
     # data = request.get_json()
-    dbtime=time.time()
+
     flag=checkauthentication(username,passwordinfo)
-    dur=(time.time()-dbtime)*1000
-    c.timing("dbconnect",dur)
     print(billid)
     if flag==True:
         print(billid)
@@ -419,10 +347,8 @@ def deletebill(billid):
         data = user_sc.dump(result)
         owner_id=data.get('id')
         print(owner_id)
-        dbtime=time.time()
+
         result2=Bills.select_user_by_billid(billid)
-        dur=(time.time()-dbtime)*1000
-        c.timing("dbconnect",dur)
         bill_sc = Billschema(many=False)
 
         data2 = bill_sc.dump((result2))
@@ -431,16 +357,11 @@ def deletebill(billid):
         print(owner_id_test)
         #return "before delete"
         if owner_id== owner_id_test:
-
-            dbtime=time.time()
             Bills.delete_bills(billid)
 
             File.delete_file_by_bill(billid)
 
             result2=File.select_file_by_billid(billid)
-
-            dur=(time.time()-dbtime)*1000
-            c.timing("dbconnect",dur)
             file_sc=Fileschema(many=False)
             data2=file_sc.dump(result2)
             file_id=data2.get('id')
@@ -455,14 +376,13 @@ def deletebill(billid):
 
 
 
-            c.incr("deletebillcount")
-            dur=(time.time()-start)*1000
-            c.timing("deletebillcount",dur)
+
+
+
+
+
             return custom_http_code("deleted",204)
         else:
-            c.incr("deletebillcount")
-            dur=(time.time()-start)*1000
-            c.timing("deletebillcount",dur)
             return custom_http_code("bill id invalid or not found",404)
 
 
@@ -472,38 +392,33 @@ def deletebill(billid):
 
 
 
+
+
+
+
+
 @app.route('/v1/bill/<billid>', methods=['GET'])
 def getasinglebill(billid):
-    start=time.time()
 
-    # print(billid)
+
+    print(billid)
     username = request.authorization.username
     passwordinfo = request.authorization.password
     # bill_sc = Billschema(many=False)
     # data = request.get_json()
-    dbtime=time.time()
+
     flag=checkauthentication(username,passwordinfo)
-
-    dur=(time.time()-dbtime)*1000
-    c.timing("dbconnect",dur)
-
     print(billid)
     if flag==True:
         print(billid)
-        dbtime=time.time()
         result=Credential.select_user_by_email(username)
-        dur=(time.time()-dbtime)*1000
-        c.timing("dbconnect",dur)
         user_sc = Credentialschema()
 
         data = user_sc.dump(result)
         owner_id=data.get('id')
         print(owner_id)
-        dbtime=time.time()
-        result2=Bills.select_user_by_billid(billid)
-        dur=(time.time()-dbtime)*1000
-        c.timing("dbconnect",dur)
 
+        result2=Bills.select_user_by_billid(billid)
         bill_sc = Billschema(many=False)
 
         data2 = bill_sc.dump((result2))
@@ -513,23 +428,14 @@ def getasinglebill(billid):
         #return "before delete"
         if owner_id== owner_id_test:
             bill_schema= Billschema(many=False)
-
-            dbtime=time.time()
             data= Bills.select_user_by_billid(billid)
-            dur=(time.time()-dbtime)*1000
-            c.timing("dbconnect",dur)
-
             query_result = bill_schema.dumps(data)
             query_result=json.loads(query_result)
 
 
             #check attachment
-            dbtime=time.time()
+
             result= File.select_file_by_billid(billid)
-            dur=(time.time()-dbtime)*1000
-            c.timing("dbconnect",dur)
-
-
             if not result:
                 attachmentfile= {}
                 query_result["attachments"]=attachmentfile
@@ -550,21 +456,15 @@ def getasinglebill(billid):
 
             #add two dict
             attachmentfile["attachments"]=final
-
-
-
-            c.incr("getbillcount")
-            dur=(time.time()-start)*1000
-            c.timing("getbillcount",dur)
             return jsonify(attachmentfile)
 
 
 
-        else:
 
-            c.incr("getbillcount")
-            dur=(time.time()-start)*1000
-            c.timing("getbillcount",dur)
+
+
+
+        else:
             return custom_http_code("invalid bill id",404)
 
 
@@ -575,15 +475,12 @@ def getasinglebill(billid):
 
 @app.route('/v1/bill/<bill_id>', methods=['PUT'])
 def getbillid(bill_id):
-    start=time.time()
     username = request.authorization.username
     passwordinfo = request.authorization.password
     bill_sc = Billschema(many=False)
     data1 = request.get_json()
-    dbtime=time.time()
+
     flag=checkauthentication(username,passwordinfo)
-    dur=(time.time()-dbtime)*1000
-    c.timing("dbconnect",dur)
 
     if flag==True:
         result=Credential.select_user_by_email(username)
@@ -593,11 +490,8 @@ def getbillid(bill_id):
         owner_id=data.get('id')
 
 
-        dbtime=time.time()
-        result2=Bills.select_user_by_billid(bill_id)
-        dur=(time.time()-dbtime)*1000
-        c.timing("dbconnect",dur)
 
+        result2=Bills.select_user_by_billid(bill_id)
         bill_sc = Billschema(many=False)
 
         data2 = bill_sc.dump((result2))
@@ -628,27 +522,24 @@ def getbillid(bill_id):
                 payment_status="due"
 
 
-            dbtime=time.time()
+
             state = Bills.query.filter_by(id=bill_id).update(dict(vendor=vendor_name,bill_date=bill_date,due_date=due_date,amount_due=amount_due,categories=categories,paymentStatus=payment_status))
 
             db.session.commit()
 
-            dur=(time.time()-dbtime)*1000
-            c.timing("dbconnect",dur)
-
             bill_schema= Billschema(many=False)
-
-
             data= Bills.select_user_by_billid(bill_id)
             query_result = bill_schema.dump(data)
 
 
-            #check attachment
-            dbtime=time.time()
-            result= File.select_file_by_billid(bill_id)
-            dur=(time.time()-dbtime)*1000
-            c.timing("dbconnect",dur)
 
+
+            ###
+
+
+            #check attachment
+
+            result= File.select_file_by_billid(bill_id)
             if not result:
                 attachmentfile= {}
                 query_result["attachments"]=attachmentfile
@@ -669,16 +560,9 @@ def getbillid(bill_id):
 
             #add two dict
             attachmentfile["attachments"]=final
-
-            c.incr("putbillcount")
-            dur=(time.time()-start)*1000
-            c.timing("putbillcount",dur)
             return jsonify(attachmentfile)
 
         else:
-            c.incr("putbillcount")
-            dur=(time.time()-start)*1000
-            c.timing("putbillcount",dur)
             return custom_http_code('Unauthorised',401)
 
     else:
@@ -686,7 +570,7 @@ def getbillid(bill_id):
 
 
 
-#########################file attach
+#########################
 
 
 
@@ -697,16 +581,13 @@ def allowed_file(filename):
 
 @app.route('/v1/bill/<billId>/file', methods=['POST'])
 def upload_file(billId):
-    start=time.time()
     bill_id=billId
     username = request.authorization.username
     passwordinfo = request.authorization.password
     bill_sc = Billschema(many=False)
     data1 = request.get_json()
-    dbtime=time.time()
+
     flag=checkauthentication(username,passwordinfo)
-    dur=(time.time()-dbtime)*1000
-    c.timing("dbconnect",dur)
 
     if flag==True:                                        #check if user exits
         result=Credential.select_user_by_email(username)
@@ -714,12 +595,7 @@ def upload_file(billId):
 
         data = user_sc.dump(result)
         owner_id=data.get('id')
-
-        dbtime=time.time()
         result2=Bills.select_user_by_billid(bill_id)
-
-        dur=(time.time()-dbtime)*1000
-        c.timing("dbconnect",dur)
         bill_sc = Billschema(many=False)
 
         data2 = bill_sc.dump((result2))
@@ -733,13 +609,24 @@ def upload_file(billId):
             #
             if 'file' not in request.files:
                 return custom_http_code('No file part in the request',400)
+
             elif file.filename == '':
                 return custom_http_code('No file part in the request',400)
+
+
             elif file and allowed_file(file.filename):
                 result= File.select_file_by_billid(bill_id)
                 print(result)
                 if result:
                     return custom_http_code("file already exists with bill delete first",400)
+
+
+
+
+
+
+
+
                 filename = secure_filename(file.filename)
                 id=str(uuid.uuid4().hex)
                 dir="attachments"+"/"+id
@@ -750,41 +637,30 @@ def upload_file(billId):
                     os.mkdir(target)
                 else:
                     return custom_http_code("file already exists",400)
+
+
+
                 destination_folder= "/".join([target, filename])
                 file.seek(0,os.SEEK_END)
                 file_len=file.tell()
-                img_key = hashlib.md5(file.read()).hexdigest()
-                obj=file.save(destination_folder)
-                #file = request.files['file']
-                object_name = id+"/"+file.filename
-                s3_client = boto3.client('s3')
-                name='attachments/'+id+'/'+filename
-                #fileobj= open(name,'r')
-                #obj=file.save(destination_folder)
-                file=request.files['file']
+                file.save(destination_folder)
 
-                dbtime=time.time()
-                uploading = s3_client.upload_fileobj(file, bucket, object_name)
-                #obj=file.save(destination_folder)
 
-                dur=(time.time()-dbtime)*1000
-                c.timing("s3time",dur)
 
-                url=bucket+"/attachments/"+id+"/"+filename
+
+
+                url="/attachments/"+id+"/"+filename
                 upload_date=datetime.datetime.today().strftime('%Y-%m-%d')
-                # img_key = hashlib.md5(file.read()).hexdigest()
+                img_key = hashlib.md5(file.read()).hexdigest()
                 #     print(img_key.encode("utf-8"))
 
-                dbtime=time.time()
+
                 new_bill = File(id,bill_id,filename,upload_date,url,file_len,img_key)
                 db.create_all()
                 db.session.add(new_bill)
                 db.session.commit()
 
 
-
-                dur=(time.time()-dbtime)*1000
-                c.timing("dbconnect",dur)
                 #   result=Credential.query.filter_by(first_name='Jane').first()
                 file_sc=File_schema_output(many=False)
                 result= File.select_file_by_file_id(id)
@@ -798,30 +674,14 @@ def upload_file(billId):
                 # data= Bills.select_user_by_billid(billid)
                 #   query_result = bill_schema.dump(data)
                 #file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-
-
-
-                c.incr("postfilecount")
-                dur=(time.time()-start)*1000
-                c.timing("postfilecount",dur)
                 return custom_http_code(data,201)
 
 
 
 
             else:
-
-
-                c.incr("postfilecount")
-                dur=(time.time()-start)*1000
-                c.timing("postfilecount",dur)
                 return custom_http_code('wrong file extension',400)
         else:
-
-
-            c.incr("postfilecount")
-            dur=(time.time()-start)*1000
-            c.timing("postfilecount",dur)
             return custom_http_code('Unauthorised',401)
 
     else:
@@ -831,20 +691,15 @@ def upload_file(billId):
 
 
 
-
-
 @app.route('/v1/bill/<billid>/file/<fileid>', methods=['GET'])
 def getfile(billid,fileid):
-    start=time.time()
     bill_id=billid
     username = request.authorization.username
     passwordinfo = request.authorization.password
     bill_sc = Billschema(many=False)
     data1 = request.get_json()
-    dbtime=time.time()
+
     flag=checkauthentication(username,passwordinfo)
-    dur=(time.time()-dbtime)*1000
-    c.timing("dbconnect",dur)
 
     if flag==True:                                        #check if user exits
         result=Credential.select_user_by_email(username)
@@ -864,28 +719,12 @@ def getfile(billid,fileid):
 
         if owner_id==owner_id2:                 #authorized against bill and user
             file_sc=File_schema_output(many=False)
-            dbtime=time.time()
             result= File.select_file_by_file_id(fileid)
-
-
-            dur=(time.time()-dbtime)*1000
-            c.timing("dbconnect",dur)
             print(result)
             data = file_sc.dump(result)
             print(data)
             if not result:
-
-                c.incr("getfilecount")
-                dur=(time.time()-start)*1000
-                c.timing("getfilecount",dur)
-
-
                 return custom_http_code("file does not exist bad request",404)
-
-
-            c.incr("getfilecount")
-            dur=(time.time()-start)*1000
-            c.timing("getfilecount",dur)
 
             return custom_http_code(data,200)
         else:
@@ -897,16 +736,13 @@ def getfile(billid,fileid):
 
 @app.route('/v1/bill/<billid>/file/<fileid>', methods=['DELETE'])
 def deletefile(billid,fileid):
-    start=time.time()
     bill_id=billid
     username = request.authorization.username
     passwordinfo = request.authorization.password
     bill_sc = Billschema(many=False)
     data1 = request.get_json()
-    dbtime=time.time()
+
     flag=checkauthentication(username,passwordinfo)
-    dur=(time.time()-dbtime)*1000
-    c.timing("dbconnect",dur)
 
     if flag==True:                                        #check if user exits
         result=Credential.select_user_by_email(username)
@@ -926,12 +762,7 @@ def deletefile(billid,fileid):
 
         if owner_id==owner_id2:                 #authorized against bill and user
             file_sc=File_schema_output(many=False)
-
-            dbtime=time.time()
             result= File.select_file_by_file_id(fileid)
-
-            dur=(time.time()-dbtime)*1000
-            c.timing("dbconnect",dur)
             print(result)
             if not result:
                 return custom_http_code("file does not exist",404)
@@ -943,13 +774,8 @@ def deletefile(billid,fileid):
             filedir=root_dir+"/"+"attachments"+"/"+fileid+"/"
             shutil.rmtree(filedir)
             File.delete_file(fileid)
-            c.incr("getfilecount")
-            dur=(time.time()-start)*1000
-            c.timing("getfilecount",dur)
+
             return custom_http_code(data,204)
-            c.incr("deletefilecount")
-            dur=(time.time()-start)*1000
-            c.timing("deletefilecount",dur)
         else:
             return custom_http_code('Unauthorised',401)
 
@@ -962,7 +788,6 @@ def deletefile(billid,fileid):
 
 @app.route('/all',methods=["GET"])
 def all():
-    start=time.time()
     result=db.session.execute("select bills.id,bills.vendor,bills.amount_due,file.url from bills LEFT JOIN file on file.bill_id=bills.id")
 
     for row in result:
@@ -974,7 +799,14 @@ def all():
     # return json.dumps(response)
 
 
-
+@app.route('/y',methods=["GET"])
+def defaultpage():
+    statsd.init_statsd({'STATSD_BUCKET_PREFIX': 'photos'})
+    timer = statsd.StatsdTimer('pipeline')
+    a='helloword'
+    b=3+8
+    timer.stop()
+    return a+b
 
 
 if __name__ == '__main__':
