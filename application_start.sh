@@ -20,7 +20,7 @@ sudo kill -9 `lsof -i:8080 -t`
 forever start -a -e error.log -a  -l loger.log -c python3 views.py
 
 
-#start cloudwatch
+#start cloudwatch####
 
 cd ../.forever
 
