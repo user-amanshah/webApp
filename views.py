@@ -1,4 +1,3 @@
-
 import bcrypt , uuid# from model import db, User1, UserSchema
 from model import db, Credential, Credentialschema , Credentialschema1 ,Bills, Billschema , Bills_schema,File,Fileschema,File_schema_output
 from flask import Flask, jsonify, request, Response
@@ -435,7 +434,7 @@ def deletebill(billid):
             dbtime=time.time()
             Bills.delete_bills(billid)
 
-            
+
 
             result2=File.select_file_by_billid(billid)
 
@@ -447,7 +446,7 @@ def deletebill(billid):
 
 
             print(result2)
-        
+
             print(data2)
             if not result2:
 
@@ -462,11 +461,25 @@ def deletebill(billid):
 
 
             #basedir=app.config['UPLOAD_FOLDER']
-            
+
             filedir=root_dir+'/'+"attachments/"+file_id+"/"
-            
+
             if os.path.isdir(filedir):
                 shutil.rmtree(filedir)
+
+                # filedir=root_dir+"/"+"attachments"+"/"+file_id+"/"
+
+                bucketkey='fileid'+'/'
+                s3 = boto3.resource("s3")
+                bucketobj = s3.Bucket(bucket)
+                file_key=file_id+'/'
+                bucketobj.objects.filter(Prefix=file_key).delete()
+
+
+
+
+
+
             else:
                 print("no attachment with bill")
             File.delete_file_by_bill(billid)
@@ -788,7 +801,7 @@ def upload_file(billId):
                 dur=(time.time()-dbtime)*1000
                 c.timing("s3time",dur)
 
-                url=bucket+"/attachments/"+id+"/"+filename
+                url='https://s3.console.aws.amazon.com/'+bucket+"/attachments/"+id+"/"+filename
                 upload_date=datetime.datetime.today().strftime('%Y-%m-%d')
                 # img_key = hashlib.md5(file.read()).hexdigest()
                 #     print(img_key.encode("utf-8"))
@@ -960,8 +973,10 @@ def deletefile(billid,fileid):
             filedir=root_dir+"/"+"attachments"+"/"+fileid+"/"
 
             bucketkey='fileid'+'/'
-            client = boto3.client('s3')
-            response = client.delete_object(Bucket=bucket,Key=bucketkey)
+            s3 = boto3.resource("s3")
+            bucketobj = s3.Bucket(bucket)
+            file_key=fileid+'/'
+            bucketobj.objects.filter(Prefix=file_key).delete()
 
             if os.path.exists(filedir):
                 shutil.rmtree(filedir)
@@ -1014,4 +1029,3 @@ if __name__ == '__main__':
     # app = create_app(env_name)
     # run app
     app.run(host='0.0.0.0',port=8080,debug=True)
-#comme

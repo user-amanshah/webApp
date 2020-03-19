@@ -3,7 +3,7 @@
 mkdir -p /home/ubuntu/webapp
 cd /home/ubuntu/webapp
 
-
+sudo chmod 777 attachments
 
 
 sudo pip3 install -r requirements.txt
