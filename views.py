@@ -70,7 +70,7 @@ def hello():
     return  page
 
 
-@app.route('/v1/user', methods=['POST'])
+@app.route('/v2/user', methods=['POST'])
 def page():
     start=time.time()
     db.create_all()
