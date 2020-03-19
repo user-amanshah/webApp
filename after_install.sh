@@ -1,8 +1,13 @@
 #!/bin/bash
 
-mkdir /home/ubuntu/webapp
+mkdir -p /home/ubuntu/webapp
 cd /home/ubuntu/webapp
 
-pip3 install -y requirements.txt
+sudo chmod 777 attachments
 
 
+sudo pip3 install -r requirements.txt
+
+cd /home/ubuntu/webapp
+sudo chmod 776 AmazonCloudWatch-config.json
+sudo mv AmazonCloudWatch-config.json /opt
