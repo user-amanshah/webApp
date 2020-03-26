@@ -24,7 +24,10 @@ forever start -a  -l loger.log -c python3 views.py
 
 sleep 2
 
+<<<<<<< HEAD
 forever start -a  -l loger.log -c python3 views.py
+=======
+>>>>>>> 0dcc76c62f702574fd4d0b6916a3619c729dd998
 #start cloudwatch####
 
 cd ../.forever
