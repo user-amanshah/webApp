@@ -8,7 +8,10 @@
 cd /home/ubuntu/webapp/
 
 
+
+
 forever stop -a  -l loger.log -c python3 views.py
+
 
 sudo kill -9 `lsof -i:8080 -t`
 
@@ -17,10 +20,13 @@ sudo kill -9 `lsof -i:8080 -t`
 
 #nohup python3 views.py >  /dev/null
 
+
+
 forever start -a  -l loger.log -c python3 views.py
 
 
-#start cloudwatch
+
+#start cloudwatch####
 
 cd ../.forever
 
