@@ -1076,7 +1076,7 @@ def daycheck(days):
 # def sendtosns():
 
 def threadFunc(email):
-    email='aman@gmail.co'
+    #email='aman@gmail.co'
     # client = boto3.client('sqs', region_name='us-east-1')
 
     sqs = boto3.resource('sqs' ,region_name='us-east-1')
