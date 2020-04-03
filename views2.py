@@ -9,13 +9,25 @@ import os , boto3,time
 import  psycopg2
 import statsd
 import bcrypt , uuid
+import logging
+import sys
+
+
+app = Flask(__name__)
+
+
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+logger = logging.getLogger()
+logger.addHandler(logging.FileHandler('logger.txt', 'a'))
+
+print = logger.info
+
 
 
 c = statsd.StatsClient('localhost',8125)
 
 
-app = Flask(__name__)
-
+print("ankajbk")
 # driver = 'postgresql+psycopg2://'
 # #comment
 # bucket=os.environ['S3BUCKET_NAME']
@@ -34,6 +46,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1234@localhost/si
 # app.config['UPLOAD_FOLDER']="/home/aman/IdeaProjects/circleCI/attachments/"
 
 root_dir = os.path.dirname(os.path.abspath(__file__))
+
 
 db.init_app(app)
 
@@ -68,6 +81,9 @@ def hello():
     c.incr("homecount")
     dur=(time.time()-start)*1000
     c.timing("hometime",dur)
+    print("jhkhkjh")
+    print("gsdjskdskd")
+
     return  page
 
 
@@ -1139,7 +1155,7 @@ def connecting(owner_id,day,email):
         print(dict)
 
 
-        
+
         response = client.publish(
             TargetArn='arn:aws:sns:us-east-1:719133250724:webapp',
             Message=json.dumps({'default': json.dumps(dict)}),
@@ -1154,4 +1170,6 @@ if __name__ == '__main__':
 
     # app = create_app(env_name)
     # run app
-    app.run(host='0.0.0.0',port=8080,debug=True)
+
+    app.run(host='0.0.0.0', port=8080, debug=True,threaded=True)
+

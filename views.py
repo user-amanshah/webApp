@@ -9,13 +9,19 @@ import os , boto3,time
 import  psycopg2
 import statsd
 import bcrypt , uuid
+import logging
+
 
 
 c = statsd.StatsClient('localhost',8125)
 
 
 app = Flask(__name__)
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+logger = logging.getLogger()
+logger.addHandler(logging.FileHandler('logger.txt', 'a'))
 
+print = logger.info
 driver = 'postgresql+psycopg2://'
 #comment
 bucket=os.environ['S3BUCKET_NAME']
@@ -26,7 +32,7 @@ print(db_host)
 db_pass=os.environ['RDS_PASSWORD']
 print(db_pass)
 db_name=os.environ['RDS_DBNAME']
-print(db_name)
+app.logger.info(db_name)
 app.config['SQLALCHEMY_DATABASE_URI'] = driver+db_user+':'+db_pass+'@'+db_host+'/'+db_name
 print(app.config['SQLALCHEMY_DATABASE_URI'])
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1234@localhost/signin'

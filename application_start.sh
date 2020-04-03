@@ -4,7 +4,11 @@
 #!/bin/bash
 
 
+cd
 
+cd /home/ubuntu
+
+sudo chmod 777
 cd /home/ubuntu/webapp/
 
 
