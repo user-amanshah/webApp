@@ -16,20 +16,20 @@ c = statsd.StatsClient('localhost',8125)
 
 app = Flask(__name__)
 
-driver = 'postgresql+psycopg2://'
-#comment
-bucket=os.environ['S3BUCKET_NAME']
-db_user= os.environ['RDS_USERNAME']
-print(db_user)
-db_host= os.environ['RDSHOST_NAME']
-print(db_host)
-db_pass=os.environ['RDS_PASSWORD']
-print(db_pass)
-db_name=os.environ['RDS_DBNAME']
-print(db_name)
-app.config['SQLALCHEMY_DATABASE_URI'] = driver+db_user+':'+db_pass+'@'+db_host+'/'+db_name
-print(app.config['SQLALCHEMY_DATABASE_URI'])
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1234@localhost/signin'
+# driver = 'postgresql+psycopg2://'
+# #comment
+# bucket=os.environ['S3BUCKET_NAME']
+# db_user= os.environ['RDS_USERNAME']
+# print(db_user)
+# db_host= os.environ['RDSHOST_NAME']
+# print(db_host)
+# db_pass=os.environ['RDS_PASSWORD']
+# print(db_pass)
+# db_name=os.environ['RDS_DBNAME']
+# print(db_name)
+# app.config['SQLALCHEMY_DATABASE_URI'] = driver+db_user+':'+db_pass+'@'+db_host+'/'+db_name
+# print(app.config['SQLALCHEMY_DATABASE_URI'])
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:1234@localhost/signin'
 # app.config['SQLALCHEMY_DATABASE_URI'] =  'postgresql://postgres@localhost/circle_test'
 # app.config['UPLOAD_FOLDER']="/home/aman/IdeaProjects/circleCI/attachments/"
 
@@ -1014,7 +1014,7 @@ def all():
     connecting()
     return  "ok"
 
-    # Output the query result as JSON
+        # Output the query result as JSON
     # print(json.dumps(response))
     # return json.dumps(response)
 
@@ -1044,10 +1044,9 @@ def daycheck(days):
 
         else:
 
-            sqs = boto3.resource('sqs',region_name='us-east-1')
             #sqs = boto3.resource('sqs',region_name='us-east-1')
             # Get the queue. This returns an SQS.Queue instance
-            queue = sqs.get_queue_by_name(QueueName='lambdaQueue')
+            queue = sqs.get_queue_by_name(QueueName='queuedemo')
             message = {}
             message["email"]=username
             message["days"]=days
@@ -1072,11 +1071,9 @@ def daycheck(days):
 def threadFunc(email):
     email='aman@gmail.co'
     # client = boto3.client('sqs', region_name='us-east-1')
+    sqs = boto3.resource('sqs',region_name='us-east-1')
 
-    sqs = boto3.resource('sqs' ,region_name='us-east-1')
-    #sqs = boto3.resource('sqs',region_name='us-east-1')
-
-    queue = sqs.get_queue_by_name(QueueName='lambdaQueue')
+    queue = sqs.get_queue_by_name(QueueName='queuedemo')
     messages = queue.receive_messages(MaxNumberOfMessages=1, WaitTimeSeconds=3)
     while len(messages) > 0:
         print(messages)
@@ -1106,11 +1103,11 @@ def threadFunc(email):
 
 def connecting(owner_id,day,email):
     try:
-        connection = psycopg2.connect(user=db_user,
-                                      password=db_pass,
-                                      host=db_host,
+        connection = psycopg2.connect(user="postgres",
+                                      password="1234",
+                                      host="127.0.0.1",
                                       port="5432",
-                                      database=db_name)
+                                      database="signin")
         cursor = connection.cursor()
 
         date1= datetime.datetime.today()
@@ -1142,10 +1139,9 @@ def connecting(owner_id,day,email):
         print(dict)
 
 
-
-        client = boto3.client('sns',region_name="us-east-1")
+        
         response = client.publish(
-            TargetArn='arn:aws:sns:us-east-1:719133250724:webapptopic',
+            TargetArn='arn:aws:sns:us-east-1:719133250724:webapp',
             Message=json.dumps({'default': json.dumps(dict)}),
             MessageStructure='json'
         )
