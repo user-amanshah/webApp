@@ -18,7 +18,7 @@ sudo kill -9 `lsof -i:8080 -t`
 
 
 
-#nohup python3 views.py >  /dev/null
+###nohup python3 views.py >  /dev/null
 
 
 
