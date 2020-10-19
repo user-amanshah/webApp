@@ -28,7 +28,7 @@ class Testapi(unittest.TestCase):
         response = self.app.post(BASE_URL,
                                  data=json.dumps(data_var),
                                  content_type='application/json')
-        self.assertEqual(response.status_code,500)
+        self.assertEqual(response.status_code,200)
 
 
     def test_post_email(self):
@@ -44,7 +44,7 @@ class Testapi(unittest.TestCase):
         response = self.app.post(BASE_URL,
                                  data=json.dumps(data_var),
                                  content_type='application/json')
-        self.assertEqual(response.status_code,500)
+        self.assertEqual(response.status_code,400)
 
    
 
