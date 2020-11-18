@@ -4,13 +4,17 @@
 #!/bin/bash
 
 
+cd
 
+cd /home/ubuntu
+
+sudo chmod 777
 cd /home/ubuntu/webapp/
 
 
 
 
-forever stop -a  -l loger.log -c python3 views.py
+sudo forever stop -a  -l loger.log -c python3 views.py
 
 
 sudo kill -9 `lsof -i:8080 -t`
@@ -18,11 +22,11 @@ sudo kill -9 `lsof -i:8080 -t`
 
 
 
-#nohup python3 views.py >  /dev/null
+###nohup python3 views.py >  /dev/null
 
 
 
-forever start -a  -l loger.log -c python3 views.py
+sudo forever start -a  -l loger.log -c python3 views.py
 
 
 
@@ -39,3 +43,8 @@ sudo mv loger.log /opt/
 cd
 
 sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/opt/AmazonCloudWatch-config.json -s
+
+
+#comment
+
+#comment2

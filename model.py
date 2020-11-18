@@ -131,7 +131,7 @@ class Bills(db.Model):
     # salt = db.Column(db.String,nullable = False)
     vendor = db.Column(db.String(128))
     bill_date = db.Column(db.String(128), nullable=False)
-    due_date = db.Column(db.String(128), nullable=False)
+    due_date = db.Column(db.DateTime, nullable=False)
     amount_due = db.Column(db.FLOAT)
     categories = db.Column(db.String)
 
