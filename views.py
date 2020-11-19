@@ -12,18 +12,22 @@ import bcrypt , uuid
 import logging
 
 
-
+ """ instantiate statsd client to enable logging """
 c = statsd.StatsClient('localhost',8125)
 
-
+"""initialise flask environment to the current module """
 app = Flask(__name__)
+
+"""enable log configuration and put logging level to info """
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 logger = logging.getLogger()
-logger.addHandler(logging.FileHandler('logger.txt', 'a'))
+logger.addHandler(logging.FileHandler('logger.txt', 'a'))  # console all logs in a text file for cloudwatch
 
-print = logger.info
+print = logger.info         # replacing stdout print with logger 
+
+
+"""get all env variables"""
 driver = 'postgresql+psycopg2://'
-#comment
 bucket=os.environ['S3BUCKET_NAME']
 db_user= os.environ['RDS_USERNAME']
 print(db_user)
@@ -44,6 +48,8 @@ root_dir = os.path.dirname(os.path.abspath(__file__))
 db.init_app(app)
 
 
+""" function to prepare response data type and http status code"""
+
 def custom_http_code(res, status_code):
     """
     Custom Response Function
@@ -55,6 +61,7 @@ def custom_http_code(res, status_code):
     )
 
 
+""" authentication"""
 def checkauthentication(useremail,password):
     user_sc = Credentialschema1()
     result=Credential.select_user_by_email(useremail)
@@ -64,7 +71,7 @@ def checkauthentication(useremail,password):
     flag=bcrypt.checkpw(password.encode('utf8'),pwd_db.encode())
     return flag
 
-
+#welome page route
 @app.route('/', methods=['GET'])
 def hello():
     start=time.time()
@@ -76,9 +83,13 @@ def hello():
     c.timing("hometime",dur)
     return  page
 
-
+#POST user data as sign in method
+"""
+IN each route instantiate two metrics , couter and timer for starting metric calculation
+"""
 @app.route('/v1/user', methods=['POST'])
 def page():
+
     start=time.time()
     db.create_all()
     user_sc = Credentialschema(many=False)
@@ -86,15 +97,10 @@ def page():
     c.timing("dbconnect",dur)
 
     data = request.get_json()
-
-
-
-
     check_email = data.get('email_address')
     check_pass = data.get('password')
 
-
-
+    #check if valid email
     def check(emailid):
         regexp = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
         if re.search(regexp, emailid):
@@ -102,14 +108,10 @@ def page():
 
         else:
             return False
-    #
     flagging = check(check_email)
 
-    #
+    
     def checkpass(passwd):
-        """
-
-        """
         if len(passwd) <= 7:
             return False
         elif not re.search("[A-Z]", passwd):
@@ -152,7 +154,9 @@ def page():
         c.timing("createusertime",dur)
         return jsonify(data)
 
-
+"""
+basic auth type authentication to retriever credential
+"""
 
 @app.route('/v1/user/self', methods=['GET'])
 def getinfo():
@@ -170,10 +174,6 @@ def getinfo():
 
 
     #auth=Credential.select_user_by_email(username)
-
-
-
-
     if flag==True:
         dbtime=time.time()
         data = user_sc.dump(Credential.select_user_by_email(username))
@@ -1156,6 +1156,7 @@ def connecting(owner_id,day,email):
             MessageStructure='json'
         )
         print("published message")
+        
     except (Exception, psycopg2.Error) as error :
         print(error)
 

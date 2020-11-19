@@ -5,7 +5,7 @@ from flask import json
 
 
 
-BASE_URL = 'http://127.0.0.1:5000/v1/user'
+BASE_URL = 'http://127.0.0.1:8080/v1/user'
 
 
 class Testapi(unittest.TestCase):
