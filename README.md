@@ -4,7 +4,7 @@
 
 ### Summary
 
-This is a  web application Library Management system built with spring
+This is a  web application Bill Management system built with spring
 boot and deployed on AWS
 
 -   EC2 instances are built on a custom
