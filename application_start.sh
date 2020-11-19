@@ -38,7 +38,6 @@ sudo chmod 776 loger.log
 
 
 
-sudo mv loger.log /opt/
 
 cd
 
