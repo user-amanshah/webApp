@@ -12,7 +12,7 @@ import bcrypt , uuid
 import logging
 
 
- """ instantiate statsd client to enable logging """
+"""instantiate statsd client to enable logging """
 c = statsd.StatsClient('localhost',8125)
 
 """initialise flask environment to the current module """
@@ -46,6 +46,7 @@ print(app.config['SQLALCHEMY_DATABASE_URI'])
 root_dir = os.path.dirname(os.path.abspath(__file__))
 
 db.init_app(app)
+
 
 
 """ function to prepare response data type and http status code"""
