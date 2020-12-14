@@ -115,5 +115,5 @@ Serverless computing
 
 | Name | NEU ID | Email Address |
 | --- | --- | --- |
-| AMAN SHAH| 001059664 | shah.ama@husky.neu.edu|
+| AMAN SHAH| 001059664 | shah.ama@northeastern.edu|
 
